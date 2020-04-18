@@ -1,0 +1,19 @@
+{
+  "name": "d3-coursera",
+  "version": "1.0.0",
+  "description": "This work is part of a Coursera course information-visualization-programming-d3js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "D3",
+    "JavaScript",
+    "Coursera"
+  ],
+  "author": "Wassim Bekalti",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^5.15.1"
+  }
+}
