@@ -2,14 +2,11 @@
 
 <head>
     <style>
-        .line {
-            fill: none;
-            stroke: blue
-        }
+       
     </style>
 </head>
 <body>
-    <svg id="container" height="600" width="1200">
+    <svg id="container" height="900" width="900">
         
     </svg>
 </body>
@@ -17,41 +14,28 @@
 <script>
     let body = d3.select("#container")
           .append("g")
-          .attr("transform", "translate(300, 300)")
-    d3.csv("./data/data.csv").then(showData)
+          
+    d3.json("./data/countries.geo.json").then(showData)
+    
+    
+    function showData(mapInfo) {
+        let bodyHeight = 800
+        let bodyWidth = 800
 
-    function showData(data) {
-        let bodyHeight = 500
-        let bodyWidth = 1000
+        let projection = d3.geoNaturalEarth1() // try geoOrthographic() & geoMercator()
+            .scale(100)
+            .translate([bodyWidth / 2, bodyHeight / 2])
 
+        let path = d3.geoPath()
+            .projection(projection);
 
-        data = data.map(d => ({
-            country: d.country,
-            sales: +d.sales
-        }))
-
-        
-        let pie = d3.pie()
-                  .value( d => d.sales)
-        
-        let colorScale = d3.scaleOrdinal()
-                    .range(d3.schemeCategory10)
-                    .domain(data.map( d => d.country))
-        
-        let arc = d3.arc()
-                  .outerRadius(bodyHeight/2)
-                  .innerRadius(0)
-                  // change the inner radius to 200 to draw a donult chart
-        
-        let g = body.selectAll(".arc")
-                .data(pie(data))
-                .enter()
-                .append('g')
-            g.append("path")
-              .attr("d", arc)
-              .attr("fill", d => colorScale(d.data.sales))
-        }
-
+        body.selectAll("path")
+            .data(mapInfo.features)
+            .enter().append("path")
+            .attr("d", d => path(d))
+            .attr("stroke", "black")
+            .attr("fill", "none")
+    }
 
 </script>
 
