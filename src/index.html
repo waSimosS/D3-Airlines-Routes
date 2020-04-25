@@ -48,12 +48,15 @@
 
         
         valueLine = d3.line()
-                      .x( d => xScale(d.price))
-                      .y( d => yScale(d.date))
+                      .x( d => xScale(d.date))
+                      .y( d => yScale(d.price))
+                      //.defined(d => !!d.price);
+
 
         body.append('path')
             .datum(data)
             .attr('d', valueLine)
+            .attr("class","line")
     }
 
 
