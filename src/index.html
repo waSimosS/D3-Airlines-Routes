@@ -40,12 +40,15 @@
   <script>
     let store = {};
     function loadData() {
-      let promise = d3.csv("./data/routes.csv"); //TODO: change the path to just routes.csv when submission
-      return promise.then((routes) => {
-        store.routes = routes;
+    return Promise.all([
+        d3.csv("./data/routes.csv"),
+        d3.json("./data/countries.geo.json"),
+    ]).then(datasets => {
+        store.routes = datasets[0];
+        store.geoJSON = datasets[1]
         return store;
-      });
-    }
+    })
+  }
     function groupByAirline(data) {
       //Iterate over each route, producing a dictionary where the keys is are the ailines ids and the values are the information of the airline.
       let result = data.reduce((result, d) => {
@@ -92,6 +95,42 @@
 
       return { width, height, margin, bodyHeight, bodyWidth, container };
     }
+  
+  
+  function getMapConfig(){
+    let width = 600;
+    let height = 400;
+    let container = d3.select("#Map")
+    container.attr("width", width).attr("height", height);
+    return {width, height, container}
+  }
+
+  function getMapProjection(config) {
+    let {width, height} = config;
+    let projection = d3.geoMercator()
+    projection.scale(97)
+            .translate([width / 2, height / 2 + 20])
+            
+    store.mapProjection = projection;
+    return projection;
+  }
+
+  function drawBaseMap(container, countries, projection){
+    let path = d3.geoPath()
+            .projection(projection);//TODO: create a geoPath generator and set its projection to be the projection passed as parameter.
+  
+    container.selectAll("path").data(countries)
+        .enter().append("path")
+        .attr("d", d => path(d) )
+        .attr("stroke", "#ccc")
+        .attr("fill", "#eee")
+  }
+
+  function drawMap(geoJeon) {
+    let config = getMapConfig();
+    let projection = getMapProjection(config)
+    drawBaseMap(config.container, geoJeon.features, projection)
+  }
 
     function getAirlinesChartScales(airlines, config) {
       let { bodyWidth, bodyHeight } = config;
@@ -163,12 +202,13 @@
     }
 
     function showData() {
-      //Get the routes from our store variable
-      let routes = store.routes;
-      // Compute the number of routes per airline.
-      let airlines = groupByAirline(store.routes);
-      console.log(airlines);
-      drawAirlinesChart(airlines);
+        //Get the routes from our store variable
+    let routes = store.routes
+    // Compute the number of routes per airline.
+    let airlines = groupByAirline(store.routes);
+    console.log(airlines)
+    drawAirlinesChart(airlines)
+    drawMap(store.geoJSON) //Using the data saved on loadData
     }
 
     loadData().then(showData);
